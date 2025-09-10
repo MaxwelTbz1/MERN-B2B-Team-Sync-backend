@@ -42,12 +42,39 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// app.use(
+//   cors({
+//     origin: config.FRONTEND_ORIG IN,    
+//     credentials: true,
+//   })
+// );
+
+app.options("*", cors());
+
+const allowedOrigins = [
+  "https://teams-sync.vercel.app",
+  "http://localhost:5173", 
+];
+
 app.use(
   cors({
-    origin: config.FRONTEND_ORIGIN,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Not allowed by CORS for origin: ${origin}`));
+      }
+    },
     credentials: true,
   })
 );
+
+app.use((req, res, next) => {
+  console.log("CORS Request from origin:", req.headers.origin);
+  next();
+});
+
+
 
 app.get(
   `/`,
